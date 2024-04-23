@@ -15,6 +15,7 @@ const startPeriodTimer = () => {
     }, 1000);
 }
 export const initializeSocket = (server) => {
+    let isTimerRunning = false; // Track if the timer loop is running
     io = new Server(server, {
         cors: {
             origin: '*',
@@ -24,20 +25,28 @@ export const initializeSocket = (server) => {
     });
     io.on('connection', (socket) => {
         console.log('Socket connected:', socket.id);
-        setInterval(async () => {
-            console.log("🚀", countdown);
-            io.emit('periodTimer', countdown);
-            if (countdown === 30) {
-                io.emit('periodResult', await declareResult());
-            }
-        }, 1000);
+        if (!isTimerRunning) {
+            isTimerRunning = true; // Set the flag to indicate that the timer loop should run
+            const timerInterval = setInterval(async () => {
+                console.log("🚀", countdown);
+                io.emit('periodTimer', countdown);
+                if (countdown === 30) {
+                    io.emit('periodResult', await declareResult());
+                }
+            }, 1000);
 
-        socket.on('disconnect', () => {
-            console.log('Socket disconnected:', socket.id);
-        });
+            socket.on('disconnect', () => {
+                console.log('Socket disconnected:', socket.id);
+                if (io.sockets.sockets.size === 0) {
+                    clearInterval(timerInterval); // Stop the timer loop if no clients are connected
+                    isTimerRunning = false; // Reset the flag
+                }
+            });
+        }
     });
     startPeriodTimer();
 }
+
 export const getIO = () => {
     if (!io) {
         throw new Error('Socket.IO has not been initialized.');
