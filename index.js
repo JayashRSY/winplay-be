@@ -36,7 +36,7 @@ initializeSocket(server);
 // Middleware
 app.use(express.json());
 app.use(cors({
-    origin: ['https://displate-fe.vercel.app', 'https://displate.netlify.app', 'http://localhost:4200'],
+    origin: ['https://winplay-fe.vercel.app', 'https://winplay-fe.netlify.app', 'http://localhost:4200'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     optionsSuccessStatus: 204,
